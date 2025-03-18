@@ -68,6 +68,12 @@
         await Promise.all(tree.map(node => load(node, null)));
     }
 
+    function sanitizeFilename(name) {
+        return name
+            .replace(/[/\\:*?"<>|]/g, '') 
+            .substring(0, 100);           
+    }
+    
     function createExportButton() {
         const btn = document.createElement('button');
         btn.innerHTML = 'Export PDF with Bookmarks';
@@ -90,11 +96,30 @@
                 }
 
                 btn.disabled = true;
+                btn.innerHTML = 'Preparing...';
+
+                const doc = await pdfui.getCurrentPDFDoc();
+                const defaultName = doc.getFileName().replace(/\.pdf$/i, '') + '_with_bookmarks.pdf';
+
+                const userInput = prompt('请输入文件名（无需输入 .pdf 后缀）:', defaultName);
+                if (userInput === null) {
+                    btn.innerHTML = 'Export PDF with Bookmarks';
+                    btn.disabled = false;
+                    return; // 用户点击取消
+                }
+
+                let fileName = sanitizeFilename(userInput.trim());
+                if (!fileName) {
+                    alert('文件名不能为空！');
+                    return;
+                }
+                if (!fileName.toLowerCase().endsWith('.pdf')) {
+                    fileName += '.pdf';
+                }
+
                 btn.innerHTML = 'Exporting...';
 
                 const bookmarkApi = await pdfui.getBookmarkDataService();
-                const doc = await pdfui.getCurrentPDFDoc();
-                const fileName = doc.getFileName();
                 const count = doc.getPageCount();
                 const pages = mergeArrayBuffers(await doc.extractPages([[0, count - 1]]));
                 const bookmarks = await dumpBookmarks(bookmarkApi);
@@ -113,6 +138,7 @@
                 await loadBookmarks(bookmarkApi, bookmarks);
                 const file = await newDoc.getFile();
                 downloadBlob(file, fileName);
+
             } catch (error) {
                 alert('Export failed: ' + error.message);
                 console.error(error);
@@ -125,7 +151,6 @@
         document.body.appendChild(btn);
     }
 
-    // 初始化按钮
     window.addEventListener('load', () => {
         if (document.querySelector('#tm-pdf-exporter')) return;
         createExportButton();
