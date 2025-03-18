@@ -3,8 +3,6 @@
 
 该方法无视试用期 **享有70%内容的在线阅读权限** 的限制，可完整预览、下载全部内容。
 ## 安装方法
-![PixPin_2025-03-18_13-41-49](https://github.com/user-attachments/assets/5bdedad1-498d-43f2-a7af-48e7eb7ad843)
-
 ![PixPin_2025-03-18_13-42-25](https://github.com/user-attachments/assets/9c16c125-b5ad-4307-9917-a7511861f9b1)
 
 将仓库中的js文件导入即可
